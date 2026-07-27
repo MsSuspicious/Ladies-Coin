@@ -2461,9 +2461,13 @@ async function signIn(){
   if(!email || !password){ setAuthStatus('Enter your email and password.'); return; }
   setAuthStatus('Signing in…');
   const { error } = await db.auth.signInWithPassword({ email, password });
-  if(error){ setAuthStatus(error.message); return; }
-  hideAuthScreen();
-  await loadAll();
+
+if(error){
+    setAuthStatus(error.message);
+    return;
+}
+
+// Success is handled by onAuthStateChange().
 }
 
 async function signUp(){
@@ -2515,9 +2519,37 @@ async function initialize(){
     document.getElementById('auth-google').disabled = true;
     return;
   }
-  const { data: { session } } = await db.auth.getSession();
-  if(session){ hideAuthScreen(); await loadAll(); }
-  else showAuthScreen();
+db.auth.onAuthStateChange(async (event, session)=>{
+
+    console.log("Auth:", event);
+
+    if(session){
+
+        hideAuthScreen();
+
+        await loadAll();
+
+    }else{
+
+        showAuthScreen();
+
+    }
+
+});
+
+const { data:{ session } } = await db.auth.getSession();
+
+if(session){
+
+    hideAuthScreen();
+
+    await loadAll();
+
+}else{
+
+    showAuthScreen();
+
+}
 }
 
 initialize();
