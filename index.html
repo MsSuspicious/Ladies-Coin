@@ -2489,7 +2489,7 @@ async function signInWithGoogle(){
 document.getElementById('auth-signin').addEventListener('click', signIn);
 document.getElementById('auth-signup').addEventListener('click', signUp);
 document.getElementById('auth-google').addEventListener('click', signInWithGoogle);
-});
+
 document.getElementById('s-signout').addEventListener('click', async ()=>{
   if(previewMode){ previewMode = false; showAuthScreen(); return; }
   if(!db) return;
