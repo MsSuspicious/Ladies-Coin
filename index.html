@@ -293,6 +293,8 @@
     align-items:center;
     justify-content:center;
     padding:20px;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
 
     background:
         linear-gradient(
@@ -307,6 +309,8 @@
 }
 .auth-card{
   width:min(100%,380px);
+  margin:auto;
+  max-height:none;
 
   background:rgba(255,255,255,.78);
 
@@ -334,6 +338,11 @@
     font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;}
   .auth-divider::before, .auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
   .auth-status{min-height:20px;margin:12px 0 0;font-size:12px;color:var(--text-muted);text-align:center;}
+  @media (max-width:380px){
+    .auth-screen{padding:12px;}
+    .auth-card{padding:18px;}
+    .auth-card h2{font-size:20px;}
+  }
   .btn-google{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
     background:var(--surface);color:var(--text);border:1.5px solid var(--border);margin-top:18px;}
   [data-theme="dark"] .btn-google{background:var(--surface-2);}
@@ -2483,9 +2492,15 @@ async function signUp(){
 async function signInWithGoogle(){
   if(!db){ setAuthStatus('Cloud sync isn\'t set up yet.'); return; }
   setAuthStatus('Redirecting to Google…');
+  // Strip any leftover OAuth params from a previous (failed) attempt so
+  // redirectTo is always a clean URL.
+  const cleanUrl = window.location.origin + window.location.pathname;
   const { error } = await db.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.href }
+    options: {
+      redirectTo: cleanUrl,
+      queryParams: { prompt: 'select_account' }
+    }
   });
   if(error){ setAuthStatus(error.message); }
 }
@@ -2497,7 +2512,14 @@ document.getElementById('auth-google').addEventListener('click', signInWithGoogl
 document.getElementById('s-signout').addEventListener('click', async ()=>{
   if(previewMode){ previewMode = false; showAuthScreen(); return; }
   if(!db) return;
-  await db.auth.signOut();
+  const { error } = await db.auth.signOut();
+  if(error) console.error('signOut error', error);
+  // Belt-and-braces: remove any leftover sb-*-auth-token / PKCE
+  // code-verifier keys. A stale verifier here is the #1 cause of a
+  // "sign in with Google" that silently fails right after logout.
+  Object.keys(localStorage)
+    .filter(k => k.startsWith('sb-'))
+    .forEach(k => localStorage.removeItem(k));
   showAuthScreen('Signed out.');
 });
 
@@ -2519,23 +2541,44 @@ async function initialize(){
     document.getElementById('auth-google').disabled = true;
     return;
   }
-db.auth.onAuthStateChange(async (event, session)=>{
+
+  // Check for an OAuth error Google/Supabase sent back in the URL
+  // (hash for implicit flow, query string for PKCE). Without this,
+  // a failed Google round-trip just looks like a silent bounce to
+  // the login screen with no clue why.
+  const hashParams = new URLSearchParams(window.location.hash.slice(1));
+  const searchParams = new URLSearchParams(window.location.search);
+  const oauthError = hashParams.get('error_description') || searchParams.get('error_description')
+    || hashParams.get('error') || searchParams.get('error');
+  if(oauthError){
+    console.error('OAuth redirect error:', oauthError);
+    showAuthScreen('Google sign-in failed: ' + oauthError);
+    // Clean the broken params out of the URL so a page refresh
+    // doesn't keep re-triggering the same stale error.
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  db.auth.onAuthStateChange(async (event, session)=>{
     console.log("Auth:", event);
     if(session){
-        hideAuthScreen();
-        await loadAll();
-    }else{
-        showAuthScreen();
+      hideAuthScreen();
+      await loadAll();
+    }else if(!oauthError){
+      showAuthScreen();
     }
-});
-const { data:{ session } } = await db.auth.getSession();
-if(session){
-    hideAuthScreen();
-    await loadAll();
-}else{
-    showAuthScreen();
+  });
+
+  if(!oauthError){
+    const { data:{ session } } = await db.auth.getSession();
+    if(session){
+      hideAuthScreen();
+      await loadAll();
+    }else{
+      showAuthScreen();
+    }
+  }
 }
-}
+
 initialize();
 </script>
 </body>
