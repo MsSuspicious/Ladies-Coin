@@ -285,8 +285,26 @@
   .m-confirm{background:var(--pink);color:#fff;}
 
   /* Sign-in screen for your private cloud data */
-  .auth-screen{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;
-    padding:20px;background:var(--bg);}
+.auth-screen{
+    position:fixed;
+    inset:0;
+    z-index:500;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+
+    background:
+        linear-gradient(
+            rgba(0,0,0,.20),
+            rgba(0,0,0,.20)
+        ),
+        url("images/login-background.webp");
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+}
   .auth-card{width:min(100%,380px);background:var(--surface);border:1px solid var(--border);
     border-radius:20px;padding:26px;box-shadow:var(--shadow);}
   .auth-card h2{font-family:'Fraunces',serif;font-size:24px;margin:0 0 6px;}
