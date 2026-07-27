@@ -421,7 +421,6 @@
     </button>
 
     <p class="auth-status" id="auth-status"></p>
-    <button class="btn btn-ghost btn-block" id="auth-preview" style="margin-top:14px;">Preview without signing in</button>
   </div>
 </div>
 <div id="app">
@@ -2490,11 +2489,6 @@ async function signInWithGoogle(){
 document.getElementById('auth-signin').addEventListener('click', signIn);
 document.getElementById('auth-signup').addEventListener('click', signUp);
 document.getElementById('auth-google').addEventListener('click', signInWithGoogle);
-document.getElementById('auth-preview').addEventListener('click', async ()=>{
-  previewMode = true;
-  hideAuthScreen();
-  await loadAll();
-  showToast('Previewing locally — not synced to your account');
 });
 document.getElementById('s-signout').addEventListener('click', async ()=>{
   if(previewMode){ previewMode = false; showAuthScreen(); return; }
