@@ -183,16 +183,8 @@
   .empty{text-align:center;color:var(--text-muted);font-size:13.5px;padding:24px 8px;}
 
   /* Hero net worth */
-  .hero{position:relative;overflow:hidden;
-    background:rgba(255,255,255,.78);
-    backdrop-filter:blur(18px);
-    -webkit-backdrop-filter:blur(18px);
-    border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:20px;margin-top:6px;
-    box-shadow:0 12px 40px rgba(0,0,0,.25);}
-  [data-theme="dark"] .hero{
-    background:rgba(26,15,19,.90);
-    border-color:rgba(201,135,144,.25);
-    box-shadow:0 12px 40px rgba(0,0,0,.5);}
+  .hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--pink-soft),var(--green-soft));
+    border:1px solid var(--border);border-radius:20px;padding:20px;margin-top:6px;}
   .hero .coins{position:absolute;right:-10px;top:-10px;opacity:.55;}
   .hero .coins .c{position:absolute;border-radius:50%;border:2.5px solid var(--pink);width:46px;height:46px;}
   .hero .coins .c2{border-color:var(--green);top:20px;right:26px;width:34px;height:34px;}
