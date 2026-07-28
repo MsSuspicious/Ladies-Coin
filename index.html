@@ -183,8 +183,16 @@
   .empty{text-align:center;color:var(--text-muted);font-size:13.5px;padding:24px 8px;}
 
   /* Hero net worth */
-  .hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--pink-soft),var(--green-soft));
-    border:1px solid var(--border);border-radius:20px;padding:20px;margin-top:6px;}
+  .hero{position:relative;overflow:hidden;
+    background:rgba(255,255,255,.78);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:20px;margin-top:6px;
+    box-shadow:0 12px 40px rgba(0,0,0,.25);}
+  [data-theme="dark"] .hero{
+    background:rgba(26,15,19,.90);
+    border-color:rgba(201,135,144,.25);
+    box-shadow:0 12px 40px rgba(0,0,0,.5);}
   .hero .coins{position:absolute;right:-10px;top:-10px;opacity:.55;}
   .hero .coins .c{position:absolute;border-radius:50%;border:2.5px solid var(--pink);width:46px;height:46px;}
   .hero .coins .c2{border-color:var(--green);top:20px;right:26px;width:34px;height:34px;}
@@ -313,6 +321,7 @@
   max-height:none;
 
   background:rgba(255,255,255,.78);
+  color:#241A1C;
 
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
@@ -324,13 +333,13 @@
   padding:26px;
 
   box-shadow:0 12px 40px rgba(0,0,0,.25);
-  
-  /* Dark mode glass adjustment */
-[data-theme="dark"] .auth-card{
-  background:rgba(52,28,34,.88);
-  border-color:rgba(201,135,144,.25);
-  box-shadow:0 12px 40px rgba(0,0,0,.45);
 }
+/* Dark mode glass adjustment - tinted darker + more opaque so text stays legible over the background photo */
+[data-theme="dark"] .auth-card{
+  background:rgba(26,15,19,.90);
+  color:#F5ECEA;
+  border-color:rgba(201,135,144,.25);
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
 }
   .auth-card h2{font-family:'Fraunces',serif;font-size:24px;margin:0 0 6px;}
   .auth-card p{font-size:13px;line-height:1.55;color:var(--text-muted);margin:0 0 18px;}
@@ -361,13 +370,16 @@
 .auth-card .field input,
 .auth-card .field select,
 .auth-card .field textarea {
-    background:rgba(255,255,255,.45);
-    color:var(--auth-text);
-    border-color:var(--auth-card-border);
+    background:rgba(255,255,255,.55);
+    color:#241A1C;
+    border-color:rgba(90,45,50,.25);
 }
 .auth-card .field input::placeholder,
 .auth-card .field textarea::placeholder {
-    color:var(--auth-muted);
+    color:#8C7B7D;
+}
+.auth-card .field label{
+    color:#241A1C;
 }
 [data-theme="dark"] .auth-card .field input,
 [data-theme="dark"] .auth-card .field select,
@@ -2497,10 +2509,25 @@ function showAuthScreen(message=''){
 }
 function hideAuthScreen(){ document.getElementById('auth-screen').classList.add('hidden'); }
 
+// Hardcoded offline test account. Signs in locally (via previewMode + localStorage)
+// without touching Supabase — handy for testing without a network/cloud setup.
+const OFFLINE_TEST_EMAIL = 'admin@gmail.com';
+const OFFLINE_TEST_PASSWORD = '123456';
+
 async function signIn(){
   const email = document.getElementById('auth-signin-email').value.trim();
   const password = document.getElementById('auth-signin-password').value;
   if(!email || !password){ setAuthStatus('Enter your email and password.'); return; }
+
+  if(email.toLowerCase() === OFFLINE_TEST_EMAIL && password === OFFLINE_TEST_PASSWORD){
+    setAuthStatus('Signing in (offline test mode)…');
+    previewMode = true;
+    hideAuthScreen();
+    await loadAll();
+    return;
+  }
+
+  if(!db){ setAuthStatus('Cloud sync isn\'t set up yet.'); return; }
   setAuthStatus('Signing in…');
   const { error } = await db.auth.signInWithPassword({ email, password });
 
@@ -2568,8 +2595,7 @@ function renderAll(){
 
 async function initialize(){
   if(!db){
-    showAuthScreen('Add your Supabase URL and publishable key in this file to turn on cloud sync.');
-    document.getElementById('auth-signin').disabled = true;
+    showAuthScreen('Add your Supabase URL and publishable key in this file to turn on cloud sync, or sign in with the offline test account.');
     document.getElementById('auth-signup').disabled = true;
     document.getElementById('auth-google').disabled = true;
     return;
