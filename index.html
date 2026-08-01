@@ -2437,7 +2437,7 @@ function exportReportPDF(){
   doc.rect(0, 0, pageWidth, 112, 'F');
   doc.setFont('Fraunces','bold'); doc.setFontSize(27);
   doc.setTextColor(PDF_COLOR.pinkInk[0], PDF_COLOR.pinkInk[1], PDF_COLOR.pinkInk[2]);
-  doc.text("Ladies' Coins", margin, 56);
+  doc.text("Ladies' Coin", margin, 56);
   doc.setFont('Fraunces','italic'); doc.setFontSize(12);
   doc.setTextColor(PDF_COLOR.pinkInk[0], PDF_COLOR.pinkInk[1], PDF_COLOR.pinkInk[2]);
   doc.text('Monthly Report', margin, 76);
@@ -2470,7 +2470,13 @@ function exportReportPDF(){
   statCard(margin + boxW + gap, 'Expense', totalExpense, PDF_COLOR.redSoft, PDF_COLOR.redInk);
   statCard(margin + 2*(boxW + gap), 'Net', net, PDF_COLOR.pinkSoft, net>=0 ? PDF_COLOR.greenInk : PDF_COLOR.redInk);
   doc.setTextColor(PDF_COLOR.ink[0], PDF_COLOR.ink[1], PDF_COLOR.ink[2]);
-  cursorY += boxH + 34;
+  cursorY += boxH + 20;
+
+  doc.setFont('Fraunces','italic'); doc.setFontSize(9);
+  doc.setTextColor(PDF_COLOR.grey[0], PDF_COLOR.grey[1], PDF_COLOR.grey[2]);
+  doc.text('*All transactions logged as Rupiah (IDR)', margin, cursorY);
+  doc.setTextColor(PDF_COLOR.ink[0], PDF_COLOR.ink[1], PDF_COLOR.ink[2]);
+  cursorY += 24;
 
   /* ---- Account balances ---- */
   pdfSectionLabel(doc, 'Account Balances', margin, cursorY, PDF_COLOR.lavenderInk);
@@ -2551,6 +2557,7 @@ function exportReportPDF(){
       columnStyles:{ 4:{ halign:'right' }, 5:{ halign:'right' } },
       didParseCell:(data)=>{
         if(data.section==='body'){
+          if(data.column.index===2){ data.cell.styles.fontStyle = 'italic'; data.cell.styles.textColor = PDF_COLOR.grey; }
           if(data.column.index===4 && data.cell.raw){ data.cell.styles.textColor = PDF_COLOR.redInk; }
           if(data.column.index===5 && data.cell.raw){ data.cell.styles.textColor = PDF_COLOR.greenInk; }
         }
@@ -2614,7 +2621,7 @@ function exportReportPDF(){
       doc.rect(0, 0, pageWidth, 40, 'F');
       doc.setFont('Fraunces','bolditalic'); doc.setFontSize(12);
       doc.setTextColor(PDF_COLOR.pinkInk[0], PDF_COLOR.pinkInk[1], PDF_COLOR.pinkInk[2]);
-      doc.text("Ladies' Coins", margin, 25);
+      doc.text("Ladies' Coin", margin, 25);
       doc.setFont('helvetica','normal'); doc.setFontSize(9);
       doc.setTextColor(PDF_COLOR.grey[0], PDF_COLOR.grey[1], PDF_COLOR.grey[2]);
       doc.text(monthLabel, pageWidth - margin, 25, { align:'right' });
@@ -2622,7 +2629,7 @@ function exportReportPDF(){
     pdfDivider(doc, margin, pageWidth - margin, pageHeight - 34, PDF_COLOR.line);
     doc.setFont('Fraunces','italic'); doc.setFontSize(9);
     doc.setTextColor(PDF_COLOR.grey[0], PDF_COLOR.grey[1], PDF_COLOR.grey[2]);
-    doc.text("Ladies' Coins · rule the money based on the science of girl's math", margin, pageHeight - 20);
+    doc.text("Ladies' Coin · rule the money based on the science of girl's math", margin, pageHeight - 20);
     doc.setFont('helvetica','normal');
     doc.text(`Page ${i} of ${pageCount}`, pageWidth - margin, pageHeight - 20, { align:'right' });
   }
