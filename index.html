@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root{
     color-scheme: light;
@@ -69,7 +71,13 @@
     text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);background:var(--surface-2);
     padding:2px 7px;border-radius:20px;vertical-align:middle;margin-left:2px;}
   header.topbar p{margin:0;font-size:11.5px;color:var(--text-muted);letter-spacing:.4px;text-transform:uppercase;}
-  .header-theme-switch{margin-left:auto;width:44px;height:24px;}
+  .header-actions{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .header-icon-btn{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    background:var(--surface-2);color:var(--text-muted);border:none;cursor:pointer;transition:color .15s ease,transform .15s ease;}
+  .header-icon-btn svg{width:17px;height:17px;}
+  .header-icon-btn:hover{color:var(--text);}
+  .header-icon-btn:active{transform:scale(.92);}
+  .header-theme-switch{width:44px;height:24px;}
   .header-theme-switch .slider{background:var(--surface-2);}
   .header-theme-switch .slider:before{width:18px;height:18px;left:3px;top:3px;
     display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;content:"☀";color:var(--amber-ink);}
@@ -181,6 +189,7 @@
   .btn-primary:active{transform:scale(.98);}
   .btn-ghost{background:var(--surface-2);color:var(--pink-ink);}
   .btn-danger{background:var(--red-soft);color:var(--red-ink);}
+  .btn-danger-solid{background:var(--red);color:#ffffff;}
   .btn-block{width:100%;margin-top:10px;}
   .btn-inline{width:auto;margin-top:0;}
   .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 10px;}
@@ -348,6 +357,23 @@
   .acc-icon-lavender{background:var(--lavender-soft);color:var(--lavender-ink);}
   .acc-icon-amber{background:var(--amber-soft);color:var(--amber-ink);}
   .acc-icon-blue{background:var(--blue-soft);color:var(--blue-ink);}
+  .budget-item{padding:14px 0;border-bottom:1px solid var(--border, rgba(0,0,0,.06));}
+  .budget-item:last-child{border-bottom:none;}
+  .budget-item-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px;}
+  .budget-item-head .cat{font-weight:700;font-size:13.5px;}
+  .budget-item-head .nums{font-size:12.5px;color:var(--text-muted);white-space:nowrap;}
+  .budget-item.over .nums{color:var(--red-ink);font-weight:700;}
+  .budget-bar{height:8px;border-radius:6px;background:var(--lavender-soft);overflow:hidden;position:relative;}
+  .budget-bar-fill{height:100%;border-radius:6px;background:var(--blue-ink);transition:width .3s ease;}
+  .budget-pace-marker{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--text);opacity:.55;z-index:2;}
+  .budget-pace-line{font-size:11px;color:var(--text-muted);margin-top:5px;}
+  .budget-item.over .budget-bar{background:var(--red-soft);}
+  .budget-item.over .budget-bar-fill{background:var(--red-ink);}
+  .budget-item-foot{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+  .budget-remaining{font-size:12px;color:var(--text-muted);}
+  .budget-item.over .budget-remaining{color:var(--red-ink);font-weight:700;}
+  .budget-del{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:11.5px;text-decoration:underline;padding:0;}
+  .budget-empty{color:var(--text-muted);font-size:13px;padding:6px 0;}
   .acc-icon-red{background:var(--red-soft);color:var(--red-ink);}
 
   .subtabs{display:flex;gap:8px;margin-top:18px;border-bottom:1.5px solid var(--border);}
@@ -420,15 +446,15 @@
   .tabbar button[data-tab="input"] svg{color:var(--pink-ink);}
   .tabbar button[data-tab="investment"] svg{color:var(--green-ink);}
   .tabbar button[data-tab="report"] svg{color:var(--lavender-ink);}
+  .tabbar button[data-tab="budgeting"] svg{color:var(--blue-ink);}
   .tabbar button[data-tab="splitbill"] svg{color:var(--amber-ink);}
-  .tabbar button[data-tab="settings"] svg{color:var(--text-muted);}
 
   /* Active label picks up that same tab color instead of one fixed pink */
   .tabbar button[data-tab="input"].active{color:var(--pink-ink);}
   .tabbar button[data-tab="investment"].active{color:var(--green-ink);}
   .tabbar button[data-tab="report"].active{color:var(--lavender-ink);}
+  .tabbar button[data-tab="budgeting"].active{color:var(--blue-ink);}
   .tabbar button[data-tab="splitbill"].active{color:var(--amber-ink);}
-  .tabbar button[data-tab="settings"].active{color:var(--text);}
 
   .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);
     color:var(--bg);padding:10px 18px;border-radius:12px;font-size:13px;font-weight:700;opacity:0;
@@ -717,10 +743,15 @@
       <h1>Ladies' Coins <span class="beta-badge">Beta v1</span></h1>
       <p id="header-subtitle">Rule the money based on the science of girl's math</p>
     </div>
-    <label class="switch header-theme-switch" id="header-theme-wrap" title="Toggle dark mode">
-      <input type="checkbox" id="header-theme-toggle">
-      <span class="slider"></span>
-    </label>
+    <div class="header-actions">
+      <button class="header-icon-btn" id="header-settings-btn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10 3.09V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.09A1.65 1.65 0 0 0 20.91 10H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0 19.4 15z"/></svg>
+      </button>
+      <label class="switch header-theme-switch" id="header-theme-wrap" title="Toggle dark mode">
+        <input type="checkbox" id="header-theme-toggle">
+        <span class="slider"></span>
+      </label>
+    </div>
   </header>
 
   <main>
@@ -831,13 +862,25 @@
 
       <div class="accounts-grid" id="accounts-grid"></div>
 
+      <div class="card" id="report-budgets-card" style="margin-bottom:14px;">
+        <div class="acc-card-head" style="margin-bottom:6px;">
+          <div class="acc-icon acc-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><path d="M7 14h6"/><path d="M7 17h3"/></svg></div>
+          <h3 style="margin:0;font-family:'Fraunces',serif;font-weight:600;font-size:16px;">Budgets</h3>
+        </div>
+        <div id="report-budget-list"></div>
+      </div>
+
       <div class="month-nav">
         <button id="month-prev">&#8249;</button>
         <div class="label" id="month-label"></div>
         <button id="month-next">&#8250;</button>
       </div>
 
-      <div class="subtabs" id="report-subtabs">
+      <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="btn btn-primary btn-sm btn-inline" id="report-export-pdf">Export PDF</button>
+      </div>
+
+      <div class="subtabs" id="report-subtabs" style="margin-top:10px;">
         <button data-sub="table" class="active">Ledger</button>
         <button data-sub="charts">Charts</button>
         <button data-sub="trends">Trends</button>
@@ -875,6 +918,38 @@
         </div>
       </div>
     </section>
+<!-- BUDGETING VIEW -->
+<section class="view" id="view-budgeting">
+  <h2 class="section-title" style="margin:6px 0 10px;">Budgeting</h2>
+
+  <div class="card">
+    <div class="acc-card-head" style="margin-bottom:16px;">
+      <div class="acc-icon acc-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><path d="M7 14h6"/><path d="M7 17h3"/></svg></div>
+      <h3 style="margin:0;font-family:'Fraunces',serif;font-weight:600;font-size:16px;">Set a budget</h3>
+    </div>
+    <div class="field" style="margin-top:0;">
+      <label>Category</label>
+      <select id="budget-category"></select>
+    </div>
+    <div class="field">
+      <label>Budget amount</label>
+      <input type="text" inputmode="numeric" id="budget-amount" placeholder="0">
+    </div>
+    <div class="hint">Budgets reset every month — the amount you spend here counts only for the current month, starting fresh next month.</div>
+    <div class="save-row">
+      <button class="btn btn-primary btn-sm btn-inline" id="budget-copy-last">Copy last month's budgets</button>
+      <button class="btn btn-primary btn-sm btn-inline" id="budget-save">Save budget</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="acc-card-head" style="margin-bottom:6px;">
+      <div class="acc-icon acc-icon-lavender"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg></div>
+      <h3 style="margin:0;font-family:'Fraunces',serif;font-weight:600;font-size:16px;">Your budgets</h3>
+    </div>
+    <div id="budget-list"></div>
+  </div>
+</section>
 <!-- INVESTMENT VIEW -->
 <section class="view" id="view-investment">
 
@@ -1054,7 +1129,7 @@
     <div class="card sb-step" data-step="1">
       <div class="acc-card-head" style="margin-bottom:16px;">
         <div class="acc-icon acc-icon-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h16v20l-3-2-2 2-2-2-2 2-2-2-2 2-3-2Z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg></div>
-        <h3 style="margin:0;">Bill details</h3>
+        <h3 style="margin:0;font-family:'Fraunces',serif;font-weight:600;font-size:16px;">Bill details</h3>
       </div>
       <div class="field" style="margin-top:0;">
         <label>Title</label>
@@ -1168,7 +1243,7 @@
       <label>Nickname</label>
       <input type="text" id="s-nickname" placeholder="e.g. Elainé">
     </div>
-    <div class="save-row"><button class="btn btn-ghost" id="s-save-nickname">Save nickname</button></div>
+    <div class="save-row"><button class="btn btn-primary btn-sm btn-inline" id="s-save-nickname">Save nickname</button></div>
 
     <div class="field field-icon-input">
       <label>New password</label>
@@ -1181,9 +1256,9 @@
       <input type="password" id="s-newpassword-confirm" placeholder="Repeat new password" autocomplete="new-password">
     </div>
     <p class="auth-status" id="s-password-status"></p>
-    <div class="save-row"><button class="btn btn-ghost" id="s-change-password">Change password</button></div>
+    <div class="save-row"><button class="btn btn-primary btn-sm btn-inline" id="s-change-password">Change password</button></div>
 
-    <div class="save-row"><button class="btn btn-danger" id="s-signout">Log out</button></div>
+    <div class="save-row"><button class="btn btn-sm btn-inline btn-danger-solid" id="s-signout">Log out</button></div>
   </div>
 
   <div class="card">
@@ -1203,7 +1278,7 @@
     </div>
 
     <div class="save-row">
-      <button class="btn btn-ghost" id="s-save-balances">
+      <button class="btn btn-primary btn-sm btn-inline" id="s-save-balances">
         Save balances
       </button>
     </div>
@@ -1219,7 +1294,7 @@
       <label>New source name</label>
       <input type="text" id="s-newacc-name" placeholder="e.g. BCA, Credit Card">
     </div>
-    <div class="save-row"><button class="btn btn-ghost" id="s-add-acc">Add source</button></div>
+    <div class="save-row"><button class="btn btn-primary btn-sm btn-inline" id="s-add-acc">Add source</button></div>
   </div>
 
       <h2 class="section-title">Appearance</h2>
@@ -1252,7 +1327,7 @@
             <input type="text" id="s-newcat-name" placeholder="e.g. Pets">
           </div>
         </div>
-        <div class="save-row"><button class="btn btn-ghost" id="s-add-cat">Add category</button></div>
+        <div class="save-row"><button class="btn btn-primary btn-sm btn-inline" id="s-add-cat">Add category</button></div>
       </div>
 
       <div class="card">
@@ -1271,7 +1346,7 @@
           <label>Feedback</label>
           <textarea id="fb-message" rows="4" placeholder="Tell us what you think, or report a bug…"></textarea>
         </div>
-        <div class="save-row"><button class="btn btn-ghost" id="fb-send">Send feedback</button></div>
+        <div class="save-row"><button class="btn btn-primary btn-sm btn-inline" id="fb-send">Send feedback</button></div>
       </div>
 
       <div class="card" style="margin-top:14px;">
@@ -1310,6 +1385,16 @@
     Report
   </button>
 
+  <button data-tab="budgeting">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="16" rx="2"/>
+      <line x1="3" y1="9" x2="21" y2="9"/>
+      <path d="M7 14h6"/>
+      <path d="M7 17h3"/>
+    </svg>
+    Budgeting
+  </button>
+
   <button data-tab="splitbill">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M6 2h12a1 1 0 0 1 1 1v18l-3-2-2 2-2-2-2 2-2-2-2 2V3a1 1 0 0 1 1-1z"/>
@@ -1317,14 +1402,6 @@
       <line x1="9" y1="11" x2="15" y2="11"/>
     </svg>
     Split Bill
-  </button>
-
-  <button data-tab="settings">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10 3.09V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.09A1.65 1.65 0 0 0 20.91 10H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0 19.4 15z"/>
-    </svg>
-    Settings
   </button>
 
   <div class="sidebar-footer" id="sidebar-footer">Last input<span id="sidebar-last-input">—</span></div>
@@ -1390,6 +1467,7 @@ let state = {
   transactions: [],
   investments: [],
   categories: { expenseCustom: [], incomeCustom: [] },
+  budgets: {},
   accounts: { custom: [] },
   settings: { 
     theme: 'light', 
@@ -1460,7 +1538,8 @@ function parseFormattedNumber(el){
   'inv-amount',
   'inv-current',
   'sb-service',
-  'sb-item-price'
+  'sb-item-price',
+  'budget-amount'
 ].forEach(id=>{
   const el = document.getElementById(id);
   if(el) attachThousandFormatting(el);
@@ -1538,6 +1617,8 @@ async function storageSet(key, value){
 async function loadAll(){
   state.transactions = await storageGet('transactions', []);
   state.categories = await storageGet('categories', { expenseCustom: [], incomeCustom: [] });
+  state.budgets = await storageGet('budgets', {});
+  state.budgets = migrateBudgets(state.budgets);
   state.accounts = await storageGet('accounts', { custom: [] });
   state.settings = await storageGet('settings', { theme:'light', nickname:'', initialBalances:{cash:0,investment:0} });
   state.investments = await storageGet('investments', []);
@@ -1577,6 +1658,156 @@ function getCategories(type){
   return [];
 }
 
+/* ---------- BUDGETING ---------- */
+function migrateBudgets(budgets){
+  const isOldFlatFormat = Object.values(budgets).some(v=>typeof v === 'number');
+  if(!isOldFlatFormat) return budgets;
+  const {y,m} = currentYM();
+  const mk = monthKey(y,m);
+  const migrated = { [mk]: {} };
+  Object.entries(budgets).forEach(([cat,amt])=>{
+    if(typeof amt === 'number') migrated[mk][cat] = amt;
+  });
+  return migrated;
+}
+
+function spentForCategory(cat, y, m){
+  const mk = monthKey(y, m);
+  return state.transactions
+    .filter(t=>t.type==='expense' && t.category===cat && txMonthKey(t.date)===mk)
+    .reduce((sum,t)=>sum+t.amount, 0);
+}
+
+function currentYM(){
+  const d = new Date();
+  return { y: d.getFullYear(), m: d.getMonth() };
+}
+
+function budgetsForMonth(y, m){
+  const mk = monthKey(y, m);
+  return state.budgets[mk] || {};
+}
+
+function prevYM(y, m){
+  m--; if(m<0){ m=11; y--; }
+  return {y, m};
+}
+
+function daysInMonth(y, m){
+  return new Date(y, m+1, 0).getDate();
+}
+
+function monthPace(y, m){
+  const {y:cy, m:cm} = currentYM();
+  if(y!==cy || m!==cm) return null;
+  const day = new Date().getDate();
+  const total = daysInMonth(y, m);
+  return { day, total, pct: Math.min(100, Math.round(day/total*100)) };
+}
+
+function renderBudgeting(){
+  const sel = document.getElementById('budget-category');
+  if(!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = getCategories('expense').map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  if(prev && getCategories('expense').includes(prev)) sel.value = prev;
+  fillBudgetAmountField();
+
+  const {y,m} = currentYM();
+  renderBudgetList('budget-list', true, y, m);
+}
+
+function fillBudgetAmountField(){
+  const cat = document.getElementById('budget-category').value;
+  const amountField = document.getElementById('budget-amount');
+  const {y,m} = currentYM();
+  const amt = budgetsForMonth(y,m)[cat];
+  amountField.value = amt ? toDisplayNumber(amt) : '';
+}
+document.getElementById('budget-category').addEventListener('change', fillBudgetAmountField);
+
+function renderBudgetList(containerId, editable, y, m){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  const monthBudgets = budgetsForMonth(y, m);
+  const cats = Object.keys(monthBudgets);
+  const pace = monthPace(y, m);
+
+  if(cats.length===0){
+    container.innerHTML = `<p class="budget-empty">No budgets set for this month.</p>`;
+    return;
+  }
+  container.innerHTML = cats.map(cat=>{
+    const budget = monthBudgets[cat];
+    const spent = spentForCategory(cat, y, m);
+    const remaining = budget - spent;
+    const spentPct = budget>0 ? Math.min(100, Math.round(spent/budget*100)) : 0;
+    const over = remaining < 0;
+    const paceMarker = pace ? `<div class="budget-pace-marker" style="left:${pace.pct}%;" title="${pace.day} of ${pace.total} days into the month"></div>` : '';
+    const paceLine = pace ? `<div class="budget-pace-line">Day ${pace.day}/${pace.total} of the month (${pace.pct}% elapsed) &middot; ${spentPct}% of budget used</div>` : '';
+    return `<div class="budget-item ${over?'over':''}">
+      <div class="budget-item-head">
+        <span class="cat">${escapeHtml(cat)}</span>
+        <span class="nums">${fmtIDR(spent)} / ${fmtIDR(budget)}</span>
+      </div>
+      <div class="budget-bar">${paceMarker}<div class="budget-bar-fill" style="width:${spentPct}%;"></div></div>
+      ${paceLine}
+      <div class="budget-item-foot">
+        <span class="budget-remaining">${over ? `${fmtIDR(Math.abs(remaining))} over` : `${fmtIDR(remaining)} left`}</span>
+        ${editable ? `<button class="budget-del" data-del-budget="${escapeHtml(cat)}">Remove</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+  if(editable){
+    container.querySelectorAll('[data-del-budget]').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        const cat = b.dataset.delBudget;
+        const ok = await confirmDialog(`Remove the budget for ${cat}?`);
+        if(!ok) return;
+        const {y:cy, m:cm} = currentYM();
+        delete budgetsForMonth(cy,cm)[cat];
+        await storageSet('budgets', state.budgets);
+        renderBudgeting();
+      });
+    });
+  }
+}
+
+document.getElementById('budget-save').addEventListener('click', async ()=>{
+  const cat = document.getElementById('budget-category').value;
+  const amount = parseFormattedNumber(document.getElementById('budget-amount'));
+  if(!cat){ showToast('Pick a category first'); return; }
+  if(!amount || amount<=0){ showToast('Enter a budget amount'); return; }
+  const {y,m} = currentYM();
+  const mk = monthKey(y,m);
+  if(!state.budgets[mk]) state.budgets[mk] = {};
+  state.budgets[mk][cat] = amount;
+  await storageSet('budgets', state.budgets);
+  showToast('Budget saved');
+  renderBudgeting();
+});
+
+document.getElementById('budget-copy-last').addEventListener('click', async ()=>{
+  const {y,m} = currentYM();
+  const {y:py, m:pm} = prevYM(y,m);
+  const lastMonthBudgets = budgetsForMonth(py,pm);
+  const lastMonthCats = Object.keys(lastMonthBudgets);
+  if(lastMonthCats.length===0){ showToast('No budgets found in last month'); return; }
+
+  const mk = monthKey(y,m);
+  if(!state.budgets[mk]) state.budgets[mk] = {};
+  let added = 0;
+  lastMonthCats.forEach(cat=>{
+    if(state.budgets[mk][cat] === undefined){
+      state.budgets[mk][cat] = lastMonthBudgets[cat];
+      added++;
+    }
+  });
+  await storageSet('budgets', state.budgets);
+  showToast(added>0 ? `Copied ${added} budget${added>1?'s':''} from last month` : 'Already up to date with last month');
+  renderBudgeting();
+});
+
 function getBalances(){
   const b = { ...state.settings.initialBalances };
   getAccounts().forEach(a=>{ if(typeof b[a.key] !== 'number') b[a.key]=0; });
@@ -1605,16 +1836,18 @@ function getLatestInvestmentTotals(){
 }
 
 /* ---------- NAV ---------- */
+function switchTab(tab){
+  document.querySelectorAll('.tabbar button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  state.activeTab = tab;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+  if(tab==='report') renderReport();
+  if(tab==='budgeting') renderBudgeting();
+}
 document.querySelectorAll('.tabbar button').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tabbar button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    state.activeTab = btn.dataset.tab;
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    document.getElementById('view-'+state.activeTab).classList.add('active');
-    if(state.activeTab==='report') renderReport();
-  });
+  btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
 });
+document.getElementById('header-settings-btn').addEventListener('click', ()=> switchTab('settings'));
   
 /* ---------- INVESTMENT TAB ---------- */
 function resetInvestmentForm(){
@@ -1886,6 +2119,7 @@ document.getElementById('f-submit').addEventListener('click', async ()=>{
   resetInputForm();
   renderRecentList();
   if(state.activeTab==='report') renderReport();
+  if(state.activeTab==='budgeting') renderBudgeting();
 });
 
 function startEdit(id){
@@ -1925,6 +2159,7 @@ async function deleteTx(id){
   showToast('Deleted');
   renderRecentList();
   renderReport();
+  renderBudgeting();
 }
 
 function txSummaryLine(tx){
@@ -2032,6 +2267,8 @@ function renderReport(){
   }).join('');
 
   const {y,m} = state.reportMonth;
+  renderBudgetList('report-budget-list', false, y, m);
+
   document.getElementById('month-label').textContent = MONTH_NAMES[m] + ' ' + y;
   const mk = monthKey(y,m);
   const monthTx = state.transactions.filter(t=>txMonthKey(t.date)===mk).sort((a,b)=>a.date.localeCompare(b.date));
@@ -2103,6 +2340,157 @@ function renderCharts(monthTx){
     options:{ plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{family:'Manrope', size:11} } } }, maintainAspectRatio:false }
   });
 }
+
+/* ---------- PDF EXPORT ---------- */
+function buildCategoryChartImage(monthTx){
+  const catTotals = {};
+  monthTx.filter(t=>t.type==='expense').forEach(t=>{ catTotals[t.category] = (catTotals[t.category]||0) + t.amount; });
+  const labels = Object.keys(catTotals);
+  const data = Object.values(catTotals);
+  if(labels.length===0) return null;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 500; canvas.height = 500;
+  const tempChart = new Chart(canvas.getContext('2d'), {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor: chartColors(labels.length), borderWidth:2, borderColor:'#FFFFFF' }] },
+    options:{ responsive:false, animation:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:14} } } } }
+  });
+  const image = tempChart.toBase64Image();
+  tempChart.destroy();
+  return image;
+}
+
+function exportReportPDF(){
+  const { jsPDF } = window.jspdf;
+  const { y, m } = state.reportMonth;
+  const mk = monthKey(y, m);
+  const monthTx = state.transactions.filter(t=>txMonthKey(t.date)===mk).sort((a,b)=>a.date.localeCompare(b.date));
+  const monthLabel = MONTH_NAMES[m] + ' ' + y;
+
+  const totalIncome = monthTx.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
+  const totalExpense = monthTx.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
+  const net = totalIncome - totalExpense;
+  const balances = getBalances();
+  const investTotals = getLatestInvestmentTotals();
+
+  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 40;
+  let cursorY = 50;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(18);
+  doc.text("Ladies' Coins — Monthly Report", margin, cursorY);
+  cursorY += 20;
+  doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(120);
+  doc.text(`${monthLabel} · Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`, margin, cursorY);
+  doc.setTextColor(0);
+  cursorY += 26;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(13);
+  doc.text('Summary', margin, cursorY);
+  cursorY += 8;
+  doc.autoTable({
+    startY: cursorY,
+    margin:{ left: margin, right: margin },
+    theme:'plain',
+    styles:{ fontSize:10, cellPadding:4 },
+    body:[
+      ['Income', fmtIDR(totalIncome)],
+      ['Expense', fmtIDR(totalExpense)],
+      ['Net', fmtIDR(net)],
+    ],
+  });
+  cursorY = doc.lastAutoTable.finalY + 16;
+
+  const accountRows = getAccounts().map(a=>{
+    if(a.key==='investment') return [a.label, fmtIDR(investTotals.totalCurrent)];
+    return [a.label, fmtIDR(balances[a.key]||0)];
+  });
+  doc.autoTable({
+    startY: cursorY,
+    margin:{ left: margin, right: margin },
+    head:[['Account', 'Balance']],
+    body: accountRows,
+    theme:'grid',
+    headStyles:{ fillColor:[183,110,121] },
+    styles:{ fontSize:10, cellPadding:5 },
+  });
+  cursorY = doc.lastAutoTable.finalY + 22;
+
+  const monthBudgets = budgetsForMonth(y, m);
+  const budgetCats = Object.keys(monthBudgets);
+  if(budgetCats.length>0){
+    doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text('Budgets this month', margin, cursorY);
+    cursorY += 8;
+    const budgetRows = budgetCats.map(cat=>{
+      const budget = monthBudgets[cat];
+      const spent = spentForCategory(cat, y, m);
+      const remaining = budget - spent;
+      return [cat, fmtIDR(budget), fmtIDR(spent), remaining<0 ? `${fmtIDR(Math.abs(remaining))} over` : `${fmtIDR(remaining)} left`];
+    });
+    doc.autoTable({
+      startY: cursorY,
+      margin:{ left: margin, right: margin },
+      head:[['Category','Budgeted','Spent','Status']],
+      body: budgetRows,
+      theme:'grid',
+      headStyles:{ fillColor:[91,132,177] },
+      styles:{ fontSize:10, cellPadding:5 },
+    });
+    cursorY = doc.lastAutoTable.finalY + 22;
+  }
+
+  const chartImage = buildCategoryChartImage(monthTx);
+  if(chartImage){
+    if(cursorY + 220 > doc.internal.pageSize.getHeight() - margin){ doc.addPage(); cursorY = 50; }
+    doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text('Spending by category', margin, cursorY);
+    cursorY += 10;
+    doc.addImage(chartImage, 'PNG', margin, cursorY, 200, 200);
+    cursorY += 220;
+  }
+
+  if(cursorY > doc.internal.pageSize.getHeight() - margin - 60){ doc.addPage(); cursorY = 50; }
+  doc.setFont('helvetica','bold'); doc.setFontSize(13);
+  doc.text('Transactions', margin, cursorY);
+  cursorY += 8;
+  const txRows = monthTx.map(tx=>{
+    const acct = tx.type==='transfer' ? `${accountLabel(tx.fromAccount)}→${accountLabel(tx.toAccount)}` : accountLabel(tx.account);
+    const debit = (tx.type==='expense'||tx.type==='transfer') ? fmtIDR(tx.amount) : '';
+    const credit = tx.type==='income' ? fmtIDR(tx.amount) : '';
+    return [tx.date, tx.category, tx.notes||'', acct, debit, credit];
+  });
+  if(txRows.length===0){
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120);
+    doc.text('No transactions this month.', margin, cursorY+14);
+    doc.setTextColor(0);
+  } else {
+    doc.autoTable({
+      startY: cursorY,
+      margin:{ left: margin, right: margin },
+      head:[['Date','Category','Note','Account','Expense','Income']],
+      body: txRows,
+      theme:'grid',
+      headStyles:{ fillColor:[141,130,176] },
+      styles:{ fontSize:9, cellPadding:4 },
+      columnStyles:{ 4:{ halign:'right' }, 5:{ halign:'right' } },
+    });
+  }
+
+  const pageCount = doc.internal.getNumberOfPages();
+  for(let i=1; i<=pageCount; i++){
+    doc.setPage(i);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(150);
+    doc.text(`Page ${i} of ${pageCount}`, pageWidth - margin, doc.internal.pageSize.getHeight() - 20, { align:'right' });
+  }
+
+  doc.save(`Ladies-Coins-Report-${MONTH_NAMES[m]}-${y}.pdf`);
+}
+
+document.getElementById('report-export-pdf').addEventListener('click', exportReportPDF);
+
 function isEarliestInvestmentRecord(inv){
   const records = (state.investments || []).filter(r => r.type === inv.type);
   if(records.length <= 1) return true;
@@ -2945,6 +3333,13 @@ document.getElementById('auth-signin').addEventListener('click', signIn);
 document.getElementById('auth-signup').addEventListener('click', signUp);
 document.getElementById('auth-google').addEventListener('click', signInWithGoogle);
 
+document.getElementById('auth-signin-password').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('auth-signin').click(); }
+});
+document.getElementById('auth-signin-email').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('auth-signin-password').focus(); }
+});
+
 document.getElementById('s-signout').addEventListener('click', async ()=>{
   if(previewMode){ previewMode = false; showAuthScreen(); return; }
   if(!db) return;
@@ -2967,6 +3362,7 @@ function renderAll(){
   renderReport();
   renderInvestment();
   renderSplitHistory();
+  renderBudgeting();
 }
 
 async function initialize(){
